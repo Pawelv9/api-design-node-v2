@@ -1,5 +1,5 @@
 import merge from 'lodash.merge'
-const testData = {message: 'hello'}
+const testData = { message: 'hello' }
 
 // These are generic methods used in the generic controllers for all models
 export const controllers = {
@@ -29,27 +29,51 @@ export const controllers = {
 }
 
 export const createOne = (model) => (req, res, next) => {
-
+  return controllers.createOne(model, req.body)
+    .then(doc => res.status(201).json(doc))
+    .catch(error => next(error))
 }
 
 export const updateOne = (model) => async (req, res, next) => {
+  const docToUpdate = req.docFromId
+  const update = req.body
 
+  return controllers.updateOne(docToUpdate, update)
+    .then(doc => res.status(201).json(doc))
+    .catch(error => next(error))
 }
 
 export const deleteOne = (model) => (req, res, next) => {
-
+  return controllers.deleteOne(req.docFromId)
+    .then(doc => res.status(201).json(doc))
+    .catch(error => next(error))
 }
 
 export const getOne = (model) => (req, res, next) => {
-
+  return controllers.getOne(req.docFromId)
+    .then(doc => res.status(200).json(doc))
+    .catch(error => next(error))
 }
 
 export const getAll = (model) => (req, res, next) => {
-
+  return controllers.getAll(model)
+    .then(docs => res.json(docs))
+    .catch(error => next(error))
 }
 
 export const findByParam = (model) => (req, res, next, id) => {
-  
+  return controllers.findByParam(model, Id)
+    .then(doc => {
+      if (!doc) {
+        next(new Error('Not found error'))
+      } else {
+        req.docFromId = doc
+        next()
+      }
+    })
+    .catch(error => {
+      next(error)
+    })
 }
 
 
@@ -63,5 +87,5 @@ export const generateControllers = (model, overrides = {}) => {
     createOne: createOne(model)
   }
 
-  return {...defaults, ...overrides}
+  return { ...defaults, ...overrides }
 }
